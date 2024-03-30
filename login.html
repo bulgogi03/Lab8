@@ -4,11 +4,17 @@
         <link rel="stylesheet" href="login.css">
     </head>
     <body>
-        <div>Monster University</div>
-        <div>Username</div>
-        <input text="userName" id="user" placeholder="Username">
-        <div>Password</div>
-        <input text="password" id="pw" placeholder="password">
-        <input type="submit" value="login"> 
+        <form action="/login" method="post" class="login-form">
+            <h2>Monster University</h2>
+            <div class="input-group">
+                <div>Username:</div>
+                <input type="text" name="username" id="user" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <div>Password:</div>
+                <input type="password" name="password" id="pw" placeholder="Password" required>
+            </div>
+            <input type="submit" value="Login">
+        </form>
     </body>
 </html>
