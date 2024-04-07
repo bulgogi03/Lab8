@@ -12,4 +12,15 @@
     <input type="button" value="Add Courses" onclick="addCourses()">
     <!-- outputs a display table that shows your courses or add courses -->
 </body>
+    <script>
+        function yourCourses() {
+            document.getElementById('yourCoursesTable').style.display = 'block';
+            document.getElementById('addCoursesTable').style.display = 'none';
+        }
+
+        function addCourses() {
+            document.getElementById('yourCoursesTable').style.display = 'none';
+            document.getElementById('addCoursesTable').style.display = 'block';
+        }
+    </script>
 </html>
