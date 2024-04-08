@@ -56,15 +56,21 @@ def login():
 
 @app.route('/student/<username>')
 def student_portal(username):
-    return render_template('student.html', username=username)
+    user = student.query.filter_by(username=username).first()
+    firstname = user.firstname
+    return render_template('student.html', username=username, firstname=firstname)
 
 @app.route('/teacher/<username>')
 def teacher_portal(username):
-    return render_template('teacher.html', username=username)
+    user = teacher.query.filter_by(username=username).first()
+    firstname = user.firstname
+    return render_template('teacher.html', username=username, firstname = firstname)
 
 @app.route('/admin/<username>')
 def admin_portal(username):
-    return render_template('admin.html', username=username)
+    user = admin.query.filter_by(username=username).first()
+    firstname = user.firstname
+    return render_template('admin.html', username=username, firstname = firstname)
 
 @app.route('/create_acc.html')
 def create_page():
