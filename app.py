@@ -89,7 +89,7 @@ def create_account():
     
     if existing_user:
         flash("Username already exists. Please choose a different username.", 'error')
-        return redirect(url_for('create_acc.html'))
+        return redirect(url_for('create_account'))
 
     # Create a new user account
     if account_type == 'student':
