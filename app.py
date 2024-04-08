@@ -46,25 +46,25 @@ def login():
         adminName = admin.query.filter_by(username=username).first()
 
         if studentName and studentName.password == password:
-            return redirect(url_for('student_portal'))
+            return redirect(url_for('student_portal', username=username))
         elif teacherName and teacherName.password == password:
-            return redirect(url_for('teacher_portal'))
+            return redirect(url_for('teacher_portal', username=username))
         elif adminName and adminName.password == password:
-            return redirect(url_for('admin_portal'))
+            return redirect(url_for('admin_portal', username=username))
 
     return redirect(url_for('start_page'))
 
-@app.route('/student')
-def student_portal():
-    return render_template('student.html')
+@app.route('/student/<username>')
+def student_portal(username):
+    return render_template('student.html', username=username)
 
-@app.route('/teacher')
-def teacher_portal():
-    return render_template('teacher.html')
+@app.route('/teacher/<username>')
+def teacher_portal(username):
+    return render_template('teacher.html', username=username)
 
-@app.route('/admin')
-def admin_portal():
-    return render_template('admin.html')
+@app.route('/admin/<username>')
+def admin_portal(username):
+    return render_template('admin.html', username=username)
 
 @app.route('/create_acc.html')
 def create_page():
