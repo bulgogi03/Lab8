@@ -10,16 +10,22 @@ class student(database.Model):      #database for student accounts
     id = database.Column(database.Integer, primary_key = True)
     username = database.Column(database.String(80), nullable = False, unique = True)
     password = database.Column(database.String(120), nullable = False)
+    firstname = database.Column(database.String(80), nullable = False)
+    lastname = database.Column(database.String(80), nullable = False)
 
 class teacher(database.Model):      #database for teacher accounts
     id = database.Column(database.Integer, primary_key = True)
     username = database.Column(database.String(80), nullable = False, unique = True)
     password = database.Column(database.String(120), nullable = False)
+    firstname = database.Column(database.String(80), nullable = False)
+    lastname = database.Column(database.String(80), nullable = False)
 
 class admin(database.Model):        #database for admin accounts
     id = database.Column(database.Integer, primary_key = True)
     username = database.Column(database.String(80), nullable = False, unique = True)
     password = database.Column(database.String(120), nullable = False)
+    firstname = database.Column(database.String(80), nullable = False)
+    lastname = database.Column(database.String(80), nullable = False)
 
 with app.app_context():
     database.create_all()
@@ -66,5 +72,34 @@ def admin_portal():
 @app.route('/create_acc.html')
 def create_page():
     return render_template('create_acc.html')
+
+@app.route('/create_acc', methods=['POST'])
+def create_account():
+    username=request.form['username']
+    password=request.form['password']
+    account_type=request.form['account_type']
+    firstname=request.form['firstname']
+    lastname=request.form['lastname']
+    if account_type == 'student':
+        user = student.query.filter_by(username=username).first()
+    elif account_type == 'teacher':
+        user = teacher.query.filter_by(username=username).first()
+    elif account_type == 'admin':
+        user = admin.query.filter_by(username=username).first()
+    
+    if user:
+        return "Please choose a different username"
+    else:
+        if account_type == 'student':
+            new_user = student(username=username, password=password, firstname=firstname, lastname=lastname)
+        elif account_type == 'teacher':
+            new_user = teacher(username=username, password=password, firstname=firstname, lastname=lastname)
+        elif account_type == 'admin':
+            new_user = admin(username=username, password=password, firstname=firstname, lastname=lastname)
+
+        database.session.add(new_user)
+        database.session.commit()
+        return f"Account created successfully for {username}."
+    
 if __name__ == '__main__':
     app.run(debug=True)

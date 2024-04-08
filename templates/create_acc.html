@@ -9,6 +9,10 @@
             <div class="input-group">
                 <div>Create Username:</div>
                 <input type="text" name="username" id="user" placeholder="Username" required>
+                <div>First Name:</div>
+                <input type="text" name="firstname" id="firstname" placeholder="First Name" required>
+                <div>Last Name:</div>
+                <input type="text" name="lastname" id="lastname" placeholder="Last Name" required>
             </div>
             <div class="input-group">
                 <div>Create Password:</div>
@@ -23,7 +27,12 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <input type="button" value="Create">
+            <input type="button" value="Create" onclick="create_account()">
         </form>
     </body>
+    <script>
+        function create_account(){
+            var accountType=document.querySelector('.account_type').value;
+        }
+    </script>
 </html>
