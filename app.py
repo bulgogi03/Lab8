@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -54,16 +54,13 @@ def login():
 
     return redirect(url_for('start_page'))
 
-
 @app.route('/student')
 def student_portal():
     return render_template('student.html')
 
-
 @app.route('/teacher')
 def teacher_portal():
     return render_template('teacher.html')
-
 
 @app.route('/admin')
 def admin_portal():
@@ -75,31 +72,38 @@ def create_page():
 
 @app.route('/create_acc', methods=['POST'])
 def create_account():
-    username=request.form['username']
-    password=request.form['password']
-    account_type=request.form['account_type']
-    firstname=request.form['firstname']
-    lastname=request.form['lastname']
-    if account_type == 'student':
-        user = student.query.filter_by(username=username).first()
-    elif account_type == 'teacher':
-        user = teacher.query.filter_by(username=username).first()
-    elif account_type == 'admin':
-        user = admin.query.filter_by(username=username).first()
-    
-    if user:
-        return "Please choose a different username"
-    else:
-        if account_type == 'student':
-            new_user = student(username=username, password=password, firstname=firstname, lastname=lastname)
-        elif account_type == 'teacher':
-            new_user = teacher(username=username, password=password, firstname=firstname, lastname=lastname)
-        elif account_type == 'admin':
-            new_user = admin(username=username, password=password, firstname=firstname, lastname=lastname)
+    # Retrieve form data
+    username = request.form['username']
+    password = request.form['password']
+    account_type = request.form['account_type']
+    firstname = request.form['firstname']
+    lastname = request.form['lastname']
 
-        database.session.add(new_user)
-        database.session.commit()
-        return f"Account created successfully for {username}."
+    # Check if the username already exists
+    existing_user = None
+    if account_type == 'student':
+        existing_user = student.query.filter_by(username=username).first()
+    elif account_type == 'teacher':
+        existing_user = teacher.query.filter_by(username=username).first()
+    elif account_type == 'admin':
+        existing_user = admin.query.filter_by(username=username).first()
     
+    if existing_user:
+        error_message = "Username already exists. Please choose a different username."
+        return render_template('create_acc.html', error_message=error_message)
+
+    # Create a new user account
+    if account_type == 'student':
+        new_user = student(username=username, password=password, firstname=firstname, lastname=lastname)
+    elif account_type == 'teacher':
+        new_user = teacher(username=username, password=password, firstname=firstname, lastname=lastname)
+    elif account_type == 'admin':
+        new_user = admin(username=username, password=password, firstname=firstname, lastname=lastname)
+    # Add the new user to the database
+    database.session.add(new_user)
+    database.session.commit()
+    return redirect(url_for('start_page'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)
