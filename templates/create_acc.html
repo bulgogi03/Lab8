@@ -6,6 +6,7 @@
     <body>
         <form action="/create_acc" method="post" class="create_acc-form">
             <h2>Monster's University</h2>
+            <div class="error-message">{{ error_message }}</div>
             <div class="input-group">
                 <div>Create Username:</div>
                 <input type="text" name="username" id="user" placeholder="Username" required>
@@ -28,8 +29,4 @@
             <input type="submit" value="Create">
         </form>
     </body>
-    <script>
-        function create_account(){
-        }
-    </script>
 </html>

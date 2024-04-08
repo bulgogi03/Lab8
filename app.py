@@ -80,6 +80,7 @@ def create_account():
     lastname = request.form['lastname']
 
     # Check if the username already exists
+    existing_user = None
     if account_type == 'student':
         existing_user = student.query.filter_by(username=username).first()
     elif account_type == 'teacher':
@@ -88,8 +89,8 @@ def create_account():
         existing_user = admin.query.filter_by(username=username).first()
     
     if existing_user:
-        flash("Username already exists. Please choose a different username.", 'error')
-        return redirect(url_for('create_account'))
+        error_message = "Username already exists. Please choose a different username."
+        return render_template('create_acc.html', error_message=error_message)
 
     # Create a new user account
     if account_type == 'student':
@@ -101,9 +102,8 @@ def create_account():
     # Add the new user to the database
     database.session.add(new_user)
     database.session.commit()
-
-    flash("Account successfully created!", 'success')
     return redirect(url_for('start_page'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
