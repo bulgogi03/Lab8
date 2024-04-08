@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link rel="stylesheet" href="create_acc.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='create_acc.css') }}">
     </head>
     <body>
-        <form action="/create_acc-form" method="post" class="create_acc-form">
+        <form action="/create_acc" method="post" class="create_acc-form">
             <h2>Monster's University</h2>
             <div class="input-group">
                 <div>Create Username:</div>
@@ -17,8 +17,6 @@
             <div class="input-group">
                 <div>Create Password:</div>
                 <input type="password" name="password" id="pw" placeholder="Password" required>
-                <div>Confirm Password:</div>
-                <input type="password" name="password" id="pw" placeholder="Password" required>
                 <br>
                 <label for="account_type">Please select account type: </label>
                 <select name="account_type" class="account_type">
@@ -27,12 +25,11 @@
                     <option value="admin">Admin</option>
                 </select>
             </div>
-            <input type="button" value="Create" onclick="create_account()">
+            <input type="submit" value="Create">
         </form>
     </body>
     <script>
         function create_account(){
-            var accountType=document.querySelector('.account_type').value;
         }
     </script>
 </html>
