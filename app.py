@@ -1,10 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin import BaseView
+from flask_admin import expose
+from flask_admin.contrib.sqla import ModelView
+# from flask_login import logout_user
+# from flask_login import login_required
+# from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
-app.secret_key = 'ooga booga'
+app.config['SECRET_KEY'] = 'mysecret'
 database = SQLAlchemy(app)
+
+
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+# login_manager.login_view = 'login'
 
 class student(database.Model):      
     id = database.Column(database.Integer, primary_key=True)
@@ -44,9 +56,17 @@ class classes(database.Model):
     capacity = database.Column(database.Integer)
     day = database.Column(database.String(80), nullable=False)
     time = database.Column(database.String(80), nullable=False)
+class logoutButton(BaseView):
+    @expose('/')
+    def index(self):
+        return redirect('/')
 
-
- 
+flaskAdmin = Admin(app)
+flaskAdmin.add_view(ModelView(teacher, database.session))
+flaskAdmin.add_view(ModelView(student, database.session))
+flaskAdmin.add_view(ModelView(classes, database.session))
+flaskAdmin.add_view(ModelView(enrollment, database.session))
+flaskAdmin.add_view(logoutButton(name='Logout'))
 
 with app.app_context():
     database.create_all()
@@ -111,7 +131,7 @@ def teacher_portal(username):
 def admin_portal(username):
     user = admin.query.filter_by(username=username).first()
     firstname = user.firstname
-    return render_template('admin.html', username=username, firstname = firstname)
+    return redirect('http://localhost:5000/admin/')
 
 @app.route('/create_acc.html')
 def create_page():
