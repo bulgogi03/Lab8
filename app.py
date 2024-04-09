@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -6,26 +6,28 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
 app.secret_key = 'ooga booga'
 database = SQLAlchemy(app)
 
-class student(database.Model):      #database for student accounts
-    id = database.Column(database.Integer, primary_key = True)
-    username = database.Column(database.String(80), nullable = False, unique = True)
-    password = database.Column(database.String(120), nullable = False)
-    firstname = database.Column(database.String(80), nullable = False)
-    lastname = database.Column(database.String(80), nullable = False)
+class student(database.Model):      
+    id = database.Column(database.Integer, primary_key=True)
+    username = database.Column(database.String(80), unique=True, nullable=False)
+    password = database.Column(database.String(120), nullable=False)
+    firstname = database.Column(database.String(80), nullable=False)
+    lastname = database.Column(database.String(80), nullable=False)
+    enrollment = database.relationship('enrollment', backref='Student', lazy=True)
 
-class teacher(database.Model):      #database for teacher accounts
-    id = database.Column(database.Integer, primary_key = True)
-    username = database.Column(database.String(80), nullable = False, unique = True)
-    password = database.Column(database.String(120), nullable = False)
-    firstname = database.Column(database.String(80), nullable = False)
-    lastname = database.Column(database.String(80), nullable = False)
+class teacher(database.Model):      
+    id = database.Column(database.Integer, primary_key=True)
+    username = database.Column(database.String(80), nullable=False, unique=True)
+    password = database.Column(database.String(120), nullable=False)
+    firstname = database.Column(database.String(80), nullable=False)
+    lastname = database.Column(database.String(80), nullable=False)
+    class_relation = database.relationship('classes', backref='Teacher', lazy=True)
 
-class admin(database.Model):        #database for admin accounts
-    id = database.Column(database.Integer, primary_key = True)
-    username = database.Column(database.String(80), nullable = False, unique = True)
-    password = database.Column(database.String(120), nullable = False)
-    firstname = database.Column(database.String(80), nullable = False)
-    lastname = database.Column(database.String(80), nullable = False)
+class admin(database.Model):        
+    id = database.Column(database.Integer, primary_key=True)
+    username = database.Column(database.String(80), nullable=False, unique=True)
+    password = database.Column(database.String(120), nullable=False)
+    firstname = database.Column(database.String(80), nullable=False)
+    lastname = database.Column(database.String(80), nullable=False)
 
 class enrollment(database.Model):
     id = database.Column(database.Integer, primary_key=True)
@@ -37,11 +39,12 @@ class classes(database.Model):
     id = database.Column(database.Integer, primary_key=True)
     Name = database.Column(database.String(80), unique=True, nullable=False)
     teacher_name = database.Column(database.String(80), nullable=False)
+    teacher_id = database.Column(database.Integer, database.ForeignKey('teacher.id'))
     enrollment = database.relationship('enrollment', backref='Classes', lazy=True)
     capacity = database.Column(database.Integer)
-    enrolled = database.Column(database.Integer)
     day = database.Column(database.String(80), nullable=False)
-    time = database.Column(database.String(80), nullable=False)   
+    time = database.Column(database.String(80), nullable=False)
+
 
  
 
@@ -74,15 +77,29 @@ def login():
 
 @app.route('/student/<username>')
 def student_portal(username):
-    user = student.query.filter_by(username=username).first()
-    firstname = user.firstname
-    return render_template('student.html', username=username, firstname=firstname)
+    student_user = student.query.filter_by(username=username).first()
+    if student_user:
+        firstname = student_user.firstname
+        lastname = student_user.lastname
+        fullname = firstname + " " + lastname
+        enrolled_classes = enrollment.query.filter_by(student_name=fullname).all()
+        print("Enrolled classes:", enrolled_classes)  # Add this line to check enrolled_classes
+        available_classes = classes.query.filter(classes.Name.notin_([en.class_name for en in enrolled_classes])).all()
+        return render_template('student.html', username=username, firstname=firstname, lastname=lastname, fullname=fullname, available_classes=available_classes, enrolled_classes=enrolled_classes)
+    else:
+        # Handle the case when the username does not exist
+        return "User not found"
 
 @app.route('/teacher/<username>')
 def teacher_portal(username):
     user = teacher.query.filter_by(username=username).first()
-    firstname = user.firstname
-    return render_template('teacher.html', username=username, firstname = firstname)
+    if user:
+        firstname = user.firstname
+        return render_template('teacher.html', username=username, firstname=firstname)
+    else:
+        # Handle the case where the username does not exist in the database
+        flash("Username not found", 'error')
+        return redirect(url_for('start_page'))  # Redirect to the start page or handle it differently
 
 @app.route('/admin/<username>')
 def admin_portal(username):
@@ -137,10 +154,50 @@ def new_Class():
    classID = submission["class_ID"]
    classDay = submission["class_day"]
    classTime = submission["class_time"]
-   Nc = classes(id = classID, Name = className, teacher_name = classTeacher, capacity = classSize, enrolled = "0", day = classDay, time = classTime)
+   Nc = classes(id = classID, Name = className, teacher_name = classTeacher, capacity = classSize, day = classDay, time = classTime)
    database.session.add(Nc)
    database.session.commit()
    return jsonify({'message': 'Class created successfully'}), 201
+
+from flask import flash, redirect, url_for
+
+@app.route('/enroll/<classname>/<firstname>/<lastname>', methods=['POST'])
+def enroll_class(classname, firstname, lastname):
+    # Concatenate first name and last name to get the full username
+    username = firstname + " " + lastname
+    
+    existing_enrollment = enrollment.query.filter_by(student_name=username, class_name=classname).first()
+    if existing_enrollment:
+        # Student already exists in this class
+        flash('You are already enrolled in {}!'.format(existing_enrollment.class_name))
+        return redirect(url_for('student_portal', username=username))
+    else:
+        # adds the student enrolled into the DB
+        length_enrollment = enrollment.query.filter_by(class_name=classname).count()
+        class_capacity = classes.query.filter_by(Name=classname).first()
+        if length_enrollment >= class_capacity.capacity:
+            flash('Class {} is full!'.format(classname))
+            return redirect(url_for('student_portal', username=username))
+        else:
+            class_to_enroll = enrollment(student_name=username, class_name=classname, grade=0)
+            database.session.add(class_to_enroll)
+            database.session.commit()
+            # If everything works, refresh
+            flash('You have successfully enrolled in {}!'.format(class_to_enroll.class_name))
+            return redirect(url_for('student_portal', username=username))
+        
+@app.route('/drop/<classname>/<firstname>/<lastname>', methods=['DELETE'])
+def drop_class(classname, firstname, lastname):
+    fullname = firstname + " " + lastname
+    class_to_drop = enrollment.query.filter_by(class_name=classname, student_name=fullname).first()
+    if class_to_drop:
+        database.session.delete(class_to_drop)
+        database.session.commit()
+        return jsonify({'message': 'Class dropped successfully'}), 200
+    else:
+        return jsonify({'error': 'Class not found'}), 404
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
