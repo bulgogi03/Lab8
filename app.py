@@ -159,8 +159,6 @@ def new_Class():
    database.session.commit()
    return jsonify({'message': 'Class created successfully'}), 201
 
-from flask import flash, redirect, url_for
-
 @app.route('/enroll/<classname>/<firstname>/<lastname>', methods=['POST'])
 def enroll_class(classname, firstname, lastname):
     # Concatenate first name and last name to get the full username
@@ -196,8 +194,6 @@ def drop_class(classname, firstname, lastname):
         return jsonify({'message': 'Class dropped successfully'}), 200
     else:
         return jsonify({'error': 'Class not found'}), 404
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
