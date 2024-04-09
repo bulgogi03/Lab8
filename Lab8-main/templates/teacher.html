@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='teacher.css') }}">
+    <title>Professor View</title>
+</head>
+<body>
+<div class="box centered">
+    <div id="top">
+        <h2 class="no-bold" id="welcome-message">Welcome <span id="user_name">{{firstname}}</span>!</h2>
+    </div>
+    <h1 class="uni-name">Monster's University</h1>
+    <h2>Your Courses</h2>
+    <table class="table1">
+        <thead>
+        <tr>
+            <th>Course Name</th>
+            <th>Teacher</th>
+            <th>Students Enrolled</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for class_list in taught_classes %}
+        <tr>
+            <td><a href="{{ url_for('enrolled_students', class_id=class_list.id) }}">{{ class_list.Name }}</a></td>
+            <td>{{ class_list.teacher_name }}</td>
+            <td>{{ class_list.enrollment|length }} / {{ class_list.capacity }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <h2>New Course</h2>
+    <div>
+        <label for="class_name"> Name of new Class:</label><br><br> <!-- for adding a new class with time and teacher-->
+        <input type="text" class="tbox2" id="class_name" name="class_name" /><br><br>
+        <label for="class_teacher"> ID of New Class:</label><br><br>
+        <input type="text" class="tbox2" id="class_ID" name="class_ID" /><br><br>
+        <label for="class_teacher"> Name of Assigned Teacher:</label><br><br>
+        <input type="text" class="tbox2" id="class_teacher" name="class_teacher" /><br><br>
+        <label for="class_size">Class Size:</label><br><br>
+        <input type="text" class="tbox2" id="class_size" name="class_size"/><br><br>
+        <label for="class_size">Class Day:</label><br><br>
+        <input type="text" class="tbox2" id="class_day" name="class_day"/><br><br>
+        <label for="class_size">Class Time:</label><br><br>
+        <input type="text" class="tbox2" id="class_time" name="class_time"/><br><br>
+        <input type="submit" class="subbox2" onclick="newClass()" value="Post">
+        
+        <div id="showClass"></div>
+    </div>
+    <button onclick="location.href='login'">Sign Out</button>
+</div>
+<script>
+    function newClass() {
+        var req = new XMLHttpRequest();
+        var class_name = document.getElementById("class_name").value;
+        var class_teacher = document.getElementById("class_teacher").value;
+        var class_size = document.getElementById("class_size").value;
+        var class_ID = document.getElementById("class_ID").value;
+        var class_day = document.getElementById("class_day").value;
+        var class_time = document.getElementById("class_time").value;
+        req.open("POST", "http://127.0.0.1:5000/classes/", true);
+        req.setRequestHeader("Content-Type", "application/json");
+        const body = {
+            "class_name": String(class_name), 
+            "class_teacher": String(class_teacher), 
+            "class_size": String(class_size), 
+            "class_ID":String(class_ID), 
+            "class_day":String(class_day), 
+            "class_time":String(class_time)
+        };
+        req.send(JSON.stringify(body));
+    }
+</script>
+</body>
+</html>
