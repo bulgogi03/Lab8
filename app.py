@@ -4,20 +4,11 @@ from flask_admin import Admin
 from flask_admin import BaseView
 from flask_admin import expose
 from flask_admin.contrib.sqla import ModelView
-from flask_login import logout_user
-from flask_login import login_required
-from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
 app.config['SECRET_KEY'] = 'mysecret'
 database = SQLAlchemy(app)
-
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-# login_manager.login_view = 'login'
-
-
 
 class student(database.Model):      
     id = database.Column(database.Integer, primary_key=True)
@@ -69,7 +60,7 @@ flaskAdmin.add_view(ModelView(student, database.session))
 flaskAdmin.add_view(ModelView(classes, database.session))
 flaskAdmin.add_view(ModelView(enrollment, database.session))
 flaskAdmin.add_view(logoutButton(name='Logout'))
-
+ 
 with app.app_context():
     database.create_all()
 
@@ -105,7 +96,6 @@ def student_portal(username):
         lastname = student_user.lastname
         fullname = firstname + " " + lastname
         enrolled_classes = enrollment.query.filter_by(student_name=fullname).all()
-        print("Enrolled classes:", enrolled_classes)  # Add this line to check enrolled_classes
         available_classes = classes.query.filter(classes.Name.notin_([en.class_name for en in enrolled_classes])).all()
         return render_template('student.html', username=username, firstname=firstname, lastname=lastname, fullname=fullname, available_classes=available_classes, enrolled_classes=enrolled_classes)
     else:
@@ -188,6 +178,7 @@ def new_Class():
    database.session.commit()
    return jsonify({'message': 'Class created successfully'}), 201
 
+
 @app.route('/enroll/<classname>/<firstname>/<lastname>', methods=['POST'])
 def enroll_class(classname, firstname, lastname):
     # Concatenate first name and last name to get the full username
@@ -223,6 +214,37 @@ def drop_class(classname, firstname, lastname):
         return jsonify({'message': 'Class dropped successfully'}), 200
     else:
         return jsonify({'error': 'Class not found'}), 404
+    
+@app.route('/enrolled_students/<class_name>')
+def get_enrolled_students(class_name):
+    enrolled_students = enrollment.query.filter_by(class_name=class_name).all()
+    students_with_grades = [(enrollment.student_name, enrollment.grade) for enrollment in enrolled_students]
+    return jsonify(students_with_grades)
+
+@app.route('/edit_grade/<class_name>/<student_name>', methods=['POST'])
+def edit_grade(class_name, student_name):
+    try:
+        # Retrieve the new grade from the request JSON data
+        new_grade = request.json.get('newGrade')
+
+        # Check if the new grade is provided
+        if new_grade is None:
+            return jsonify({'error': 'New grade not provided'}), 400
+
+        # Find the enrollment record based on class name and student name
+        enrollment_record = enrollment.query.filter_by(student_name=student_name, class_name=class_name).first()
+
+        # Check if the enrollment record exists
+        if enrollment_record:
+            # Update the grade
+            enrollment_record.grade = new_grade
+            database.session.commit()
+            return jsonify({'message': 'Grade updated successfully'}), 200
+        else:
+            return jsonify({'error': f'Enrollment record for {student_name} in {class_name} not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 
