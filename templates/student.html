@@ -39,6 +39,15 @@
                     <th>Students Enrolled</th>
                     <th>Add Class</th>
                 </tr>
+                {%for class in available_classes %}
+                <tr>
+                    <td>{{classes.Name}}</td>
+                    <td>{{classes.teacher_name}}</td>
+                    <td>{{classes.enrollment|length}}/{{classes.capacity}}</td>
+                    <td><button onclick="enroll('{{class.Name}}','{{Name}}')">Enroll</button></td>
+                </tr>
+                {% endfor %}
+            </table>
             </thead>
             <tbody>
                
