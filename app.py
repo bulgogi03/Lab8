@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -26,6 +26,24 @@ class admin(database.Model):        #database for admin accounts
     password = database.Column(database.String(120), nullable = False)
     firstname = database.Column(database.String(80), nullable = False)
     lastname = database.Column(database.String(80), nullable = False)
+
+class enrollment(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    student_name = database.Column(database.String(80), database.ForeignKey('student.firstname'))
+    class_name = database.Column(database.String(80), database.ForeignKey('classes.Name'))
+    grade = database.Column(database.Float)
+
+class classes(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    Name = database.Column(database.String(80), unique=True, nullable=False)
+    teacher_name = database.Column(database.String(80), nullable=False)
+    enrollment = database.relationship('enrollment', backref='Classes', lazy=True)
+    capacity = database.Column(database.Integer)
+    enrolled = database.Column(database.Integer)
+    day = database.Column(database.String(80), nullable=False)
+    time = database.Column(database.String(80), nullable=False)   
+
+ 
 
 with app.app_context():
     database.create_all()
@@ -110,6 +128,19 @@ def create_account():
     database.session.commit()
     return redirect(url_for('start_page'))
 
+@app.route('/classes/' , methods = ['POST'])
+def new_Class():
+   submission = request.get_json()
+   className = submission["class_name"]
+   classTeacher = submission["class_teacher"]
+   classSize = submission["class_size"]
+   classID = submission["class_ID"]
+   classDay = submission["class_day"]
+   classTime = submission["class_time"]
+   Nc = classes(id = classID, Name = className, teacher_name = classTeacher, capacity = classSize, enrolled = "0", day = classDay, time = classTime)
+   database.session.add(Nc)
+   database.session.commit()
+   return jsonify({'message': 'Class created successfully'}), 201
 
 if __name__ == '__main__':
     app.run(debug=True)
