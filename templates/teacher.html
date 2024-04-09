@@ -5,51 +5,81 @@
     <title>Professor View</title>
 </head>
 <body>
-<div class="box centered">
-    <div id="top">
-        <h2 class="no-bold" id="welcome-message">Welcome <span id="user_name">{{firstname}}</span>!</h2>
+    <h2>Monster's University</h2>
+    <p>Welcome Professor {{ firstname }} {{lastname}}</p> 
+    <input type="button" value="Sign Out" onclick="signOut()">
+    <input type="button" value="New Course" onclick="addCourses()">
+    <input type="button" value="View Your Course(s)" onclick="yourCourses()">
+    <input type="button" value="Edit Grades" onclick="editGrades()">
+    
+    <div id="NewCourse" class="table-container" style="display:none;">
+        <h3>New Course</h3>
+        <div>
+            <label for="class_name"> Name of new Class:</label><br><br> 
+            <input type="text" class="tbox2" id="class_name" name="class_name" /><br><br>
+            <label for="class_teacher"> ID of New Class:</label><br><br>
+            <input type="text" class="tbox2" id="class_ID" name="class_ID" /><br><br>
+            <label for="class_teacher"> Full Name of Assigned Teacher:</label><br><br>
+            <input type="text" class="tbox2" id="class_teacher" name="class_teacher" /><br><br>
+            <label for="class_size">Class Size:</label><br><br>
+            <input type="text" class="tbox2" id="class_size" name="class_size"/><br><br>
+            <label for="class_size">Class Day:</label><br><br>
+            <input type="text" class="tbox2" id="class_day" name="class_day"/><br><br>
+            <label for="class_size">Class Time:</label><br><br>
+            <input type="text" class="tbox2" id="class_time" name="class_time"/><br><br>
+            <input type="submit" class="subbox2" onclick="newClass()" value="Post">
+            
+            <div id="showClass"></div>
+        </div>
     </div>
-    <h1 class="uni-name">Monster's University</h1>
-    <h2>Your Courses</h2>
-    <table class="table1">
-        <thead>
-        <tr>
-            <th>Course Name</th>
-            <th>Teacher</th>
-            <th>Students Enrolled</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for class_list in taught_classes %}
-        <tr>
-            <td><a href="{{ url_for('enrolled_students', class_id=class_list.id) }}">{{ class_list.Name }}</a></td>
-            <td>{{ class_list.teacher_name }}</td>
-            <td>{{ class_list.enrollment|length }} / {{ class_list.capacity }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <h2>New Course</h2>
-    <div>
-        <label for="class_name"> Name of new Class:</label><br><br> <!-- for adding a new class with time and teacher-->
-        <input type="text" class="tbox2" id="class_name" name="class_name" /><br><br>
-        <label for="class_teacher"> ID of New Class:</label><br><br>
-        <input type="text" class="tbox2" id="class_ID" name="class_ID" /><br><br>
-        <label for="class_teacher"> Name of Assigned Teacher:</label><br><br>
-        <input type="text" class="tbox2" id="class_teacher" name="class_teacher" /><br><br>
-        <label for="class_size">Class Size:</label><br><br>
-        <input type="text" class="tbox2" id="class_size" name="class_size"/><br><br>
-        <label for="class_size">Class Day:</label><br><br>
-        <input type="text" class="tbox2" id="class_day" name="class_day"/><br><br>
-        <label for="class_size">Class Time:</label><br><br>
-        <input type="text" class="tbox2" id="class_time" name="class_time"/><br><br>
-        <input type="submit" class="subbox2" onclick="newClass()" value="Post">
-        
-        <div id="showClass"></div>
+    
+    <div id="yourCourses" class="table-container" style="display:none;">
+        <h3>Your Courses</h3>
+        <table class="table1">
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Students Enrolled</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class_list in teaching_classes %}
+                    <tr>
+                        <td>{{ class_list.Name }}</td>
+                        <td>{{ class_list.enrollment|length }} / {{ class_list.capacity }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+<<<<<<< HEAD
+    
+    
+    
+    <div id="editGrade" class="table-container" style="display:none;">
+        <h3>Edit Grade</h3>
+    </div>
+
+=======
     <input type="button" value="Sign Out" onclick="signOut()">
 </div>
+>>>>>>> main
 <script>
+    function yourCourses(){
+        document.getElementById('yourCourses').style.display = 'block';
+        document.getElementById('NewCourse').style.display = 'none';
+        document.getElementById('editGrade').style.display = 'none';
+    }
+    function addCourses(){
+        document.getElementById('yourCourses').style.display = 'none';
+        document.getElementById('NewCourse').style.display = 'block';
+        document.getElementById('editGrade').style.display = 'none';
+    }
+    function editGrades(){
+        document.getElementById('yourCourses').style.display = 'none';
+        document.getElementById('NewCourse').style.display = 'none';
+        document.getElementById('editGrade').style.display = 'block';
+    }
     function newClass() {
         var req = new XMLHttpRequest();
         var class_name = document.getElementById("class_name").value;
