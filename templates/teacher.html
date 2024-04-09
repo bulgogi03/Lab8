@@ -47,7 +47,7 @@
         
         <div id="showClass"></div>
     </div>
-    <button onclick="location.href='login'">Sign Out</button>
+    <input type="button" value="Sign Out" onclick="signOut()">
 </div>
 <script>
     function newClass() {
@@ -69,6 +69,11 @@
             "class_time":String(class_time)
         };
         req.send(JSON.stringify(body));
+    }
+    function signOut() {
+        // Perform sign out logic here
+        alert('Signing out');
+        window.location.href = '/';
     }
 </script>
 </body>
