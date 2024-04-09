@@ -83,10 +83,6 @@ def student_portal(username):
         lastname = student_user.lastname
         fullname = firstname + " " + lastname
         enrolled_classes = enrollment.query.filter_by(student_name=fullname).all()
-<<<<<<< HEAD
-=======
-        print("Enrolled classes:", enrolled_classes)  # Add this line to check enrolled_classes
->>>>>>> main
         available_classes = classes.query.filter(classes.Name.notin_([en.class_name for en in enrolled_classes])).all()
         return render_template('student.html', username=username, firstname=firstname, lastname=lastname, fullname=fullname, available_classes=available_classes, enrolled_classes=enrolled_classes)
     else:
@@ -95,7 +91,6 @@ def student_portal(username):
 
 @app.route('/teacher/<username>')
 def teacher_portal(username):
-<<<<<<< HEAD
     # Querying the teacher based on the provided username
     teacher_user = teacher.query.filter_by(username=username).first()
     
@@ -111,16 +106,6 @@ def teacher_portal(username):
     else:
         # Handle case where teacher with provided username is not found
         return "Teacher not found"
-=======
-    user = teacher.query.filter_by(username=username).first()
-    if user:
-        firstname = user.firstname
-        return render_template('teacher.html', username=username, firstname=firstname)
-    else:
-        # Handle the case where the username does not exist in the database
-        flash("Username not found", 'error')
-        return redirect(url_for('start_page'))  # Redirect to the start page or handle it differently
->>>>>>> main
 
 @app.route('/admin/<username>')
 def admin_portal(username):
@@ -180,10 +165,7 @@ def new_Class():
    database.session.commit()
    return jsonify({'message': 'Class created successfully'}), 201
 
-<<<<<<< HEAD
 
-=======
->>>>>>> main
 @app.route('/enroll/<classname>/<firstname>/<lastname>', methods=['POST'])
 def enroll_class(classname, firstname, lastname):
     # Concatenate first name and last name to get the full username
@@ -219,11 +201,12 @@ def drop_class(classname, firstname, lastname):
         return jsonify({'message': 'Class dropped successfully'}), 200
     else:
         return jsonify({'error': 'Class not found'}), 404
+    
+@app.route('/enrolled_students/<class_name>')
+def get_enrolled_students(class_name):
+    enrolled_students = enrollment.query.filter_by(class_name=class_name).all()
+    students_with_grades = [(enrollment.student_name, enrollment.grade) for enrollment in enrolled_students]
+    return jsonify(students_with_grades)
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> main
 if __name__ == '__main__':
     app.run(debug=True)

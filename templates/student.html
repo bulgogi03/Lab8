@@ -28,21 +28,12 @@
         <tbody>
             {% for class in enrolled_classes %}
             <tr>
-<<<<<<< HEAD
                 <td>{{ class.class_name }}</td>
                 <td>{{ class.Classes.teacher_name }}</td>
                 <td>{{ class.Classes.day }}</td>
                 <td>{{ class.Classes.time }}</td>
                 <td>{{ class.Classes.enrollment|length }}/{{ class.Classes.capacity }}</td>
                 <td><button onclick="drop('{{ class.Classes.Name }}', '{{ firstname }}', '{{ lastname }}')">Drop</button></td>
-=======
-                <td>{{ class.class_name }}</td>  <!-- Update this line if the attribute is different -->
-                <td>{{ class.Classes.teacher_name }}</td>  <!-- Update this line if the attribute is different -->
-                <td>{{ class.Classes.day }}</td>  <!-- Update this line if the attribute is different -->
-                <td>{{ class.Classes.time }}</td>  <!-- Update this line if the attribute is different -->
-                <td>{{ class.Classes.enrollment|length }}/{{ class.Classes.capacity }}</td>  <!-- Update this line if the attribute is different -->
-                <td><button onclick="drop('{{ class.Classes.Name }}', '{{ firstname }}', '{{ lastname }}')">Drop</button></td>  <!-- Update this line if the attribute is different -->
->>>>>>> main
             </tr>
             {% endfor %}
         </tbody>
@@ -111,8 +102,4 @@
         }
     </script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> main

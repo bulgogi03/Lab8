@@ -39,31 +39,51 @@
             <thead>
                 <tr>
                     <th>Course Name</th>
+                    <!---
                     <th>Students Enrolled</th>
+                    <th>Grades</th>
+                    -->
                 </tr>
             </thead>
             <tbody>
                 {% for class_list in teaching_classes %}
                     <tr>
-                        <td>{{ class_list.Name }}</td>
-                        <td>{{ class_list.enrollment|length }} / {{ class_list.capacity }}</td>
+                        <td>
+                            <button class="btn-course" data-class="{{ class_list.Name }}">{{ class_list.Name }}</button>
+                        </td>
+                        <td>
+                            <!---
+                            {% for enrollment in class_list.enrollment %}
+                                {{ enrollment.student_name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            -->
+                            ({{ class_list.enrollment|length }} / {{ class_list.capacity }})
+                        </td>
+                        <td>
+                            <!--
+                            {% for enrollment in class_list.enrollment %}
+                                {{ enrollment.grade }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            -->
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-<<<<<<< HEAD
     
-    
+    <div id="enrolledStudentsModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h4>Enrolled Students</h4>
+            <ul id="enrolledStudentsList"></ul>
+        </div>
+    </div>
     
     <div id="editGrade" class="table-container" style="display:none;">
         <h3>Edit Grade</h3>
     </div>
 
-=======
-    <input type="button" value="Sign Out" onclick="signOut()">
-</div>
->>>>>>> main
 <script>
     function yourCourses(){
         document.getElementById('yourCourses').style.display = 'block';
@@ -105,6 +125,68 @@
         alert('Signing out');
         window.location.href = '/';
     }
+    // Function to fetch enrolled students for a specific class
+    function fetchEnrolledStudents(className) {
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function () {
+            if (req.readyState === XMLHttpRequest.DONE) {
+                if (req.status === 200) {
+                    // Success - display enrolled students in a modal
+                    var enrolledStudentsModal = document.getElementById("enrolledStudentsModal");
+                    var enrolledStudentsList = document.getElementById("enrolledStudentsList");
+                    enrolledStudentsList.innerHTML = ""; // Clear previous content
+
+                    var enrolledStudents = JSON.parse(req.responseText);
+                    enrolledStudents.forEach(function (student) {
+                        var li = document.createElement("li");
+                        li.textContent = student[0] + " (Grade: " + student[1] + "%)";
+                        enrolledStudentsList.appendChild(li);
+                    });
+
+                    enrolledStudentsModal.style.display = "block";
+                } else {
+                    // Error handling
+                    console.error("Error fetching enrolled students:", req.status, req.statusText);
+                }
+            }
+        };
+
+        req.open("GET", "/enrolled_students/" + className, true);
+        req.send();
+    }
+
+    // Get the modal
+    var modal = document.getElementById("enrolledStudentsModal");
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // Function to close the modal
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        closeModal();
+    };
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    };
+
+    // Add event listener to each course button
+    var buttons = document.querySelectorAll(".btn-course");
+    buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            var className = this.getAttribute("data-class");
+            fetchEnrolledStudents(className);
+        });
+    });
 </script>
+
 </body>
 </html>
