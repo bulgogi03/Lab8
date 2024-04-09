@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='student.css') }}">
-    <!-- <link rel="stylesheet" href="student.css"> -->
 </head>
+
 <body>
     <h2>Monster's University</h2>
-    <p>Welcome {{ firstname }} {{lastname}}</p> 
+    <p>Welcome {{ firstname }} {{ lastname }}</p>
     <input type="button" value="Sign Out" onclick="signOut()">
     <input type="button" value="Your Courses" onclick="yourCourses()">
     <input type="button" value="Add Courses" onclick="addCourses()">
-    
-<!-- your courses -->
-<div id="yourCoursesTable" class="table-container">
-    <h3>Your Courses</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Course Name</th>
-                <th>Teacher</th>
-                <th>Day</th>
-                <th>Time</th>
-                <th>Students Enrolled</th>
-                <th>Drop Class</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for class in enrolled_classes %}
-            <tr>
-                <td>{{ class.class_name }}</td>
-                <td>{{ class.Classes.teacher_name }}</td>
-                <td>{{ class.Classes.day }}</td>
-                <td>{{ class.Classes.time }}</td>
-                <td>{{ class.Classes.enrollment|length }}/{{ class.Classes.capacity }}</td>
-                <td><button onclick="drop('{{ class.Classes.Name }}', '{{ firstname }}', '{{ lastname }}')">Drop</button></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 
-    
+    <!-- your courses -->
+    <div id="yourCoursesTable" class="table-container">
+        <h3>Your Courses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Teacher</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Students Enrolled</th>
+                    <th>Drop Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class in enrolled_classes %}
+                <tr>
+                    <td>{{ class.class_name }}</td>
+                    <td>{{ class.Classes.teacher_name }}</td>
+                    <td>{{ class.Classes.day }}</td>
+                    <td>{{ class.Classes.time }}</td>
+                    <td>{{ class.Classes.enrollment|length }}/{{ class.Classes.capacity }}</td>
+                    <td><button onclick="dropClass('{{ class.class_name }}')">Drop</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <!-- add Courses -->
     <div id="addCoursesTable" class="table-container" style="display:none;">
         <h3>Add Courses</h3>
@@ -60,10 +60,10 @@
                 <tr>
                     <td>{{ class.Name }}</td>
                     <td>{{ class.teacher_name }}</td>
-                    <td>{{class.day }}</td>
+                    <td>{{ class.day }}</td>
                     <td>{{ class.time }}</td>
                     <td>{{ class.enrollment|length }}/{{ class.capacity }}</td>
-                    <td><button onclick="enroll('{{ class.Name }}', '{{ firstname }}', '{{ lastname }}')">Enroll</button></td>
+                    <td><button onclick="enrollClass('{{ class.Name }}')">Enroll</button></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -81,18 +81,47 @@
             document.getElementById('addCoursesTable').style.display = 'block';
         }
 
-        function enroll(className, firstname, lastname) {
+        function enrollClass(className) {
             const req = new XMLHttpRequest();
-            req.open("POST", "http://127.0.0.1:5000/enroll/" + className + "/" + firstname + "/" + lastname);
+            req.open("POST", "/enroll/" + className + "/{{ firstname }}/{{ lastname }}");
             req.setRequestHeader("Content-Type", "application/json");
             req.send();
+            // After enrolling, update the table content
+            req.onload = function () {
+                if (req.status === 200) {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${className}</td>
+                        <td>{{ firstname }} {{ lastname }}</td>
+                        <td>New Teacher</td> <!-- Replace 'New Teacher' with actual data -->
+                        <td>New Day</td> <!-- Replace 'New Day' with actual data -->
+                        <td>New Time</td> <!-- Replace 'New Time' with actual data -->
+                        <td>0/0</td> <!-- Replace '0/0' with actual data -->
+                        <td><button onclick="dropClass('${className}')">Drop</button></td>
+                    `;
+                    document.getElementById('yourCoursesTable').getElementsByTagName('tbody')[0].appendChild(newRow);
+                }
+            };
         }
 
-        function drop(class_name, firstname, lastname) {
+        function dropClass(className) {
             const req = new XMLHttpRequest();
-            req.open("DELETE", "http://127.0.0.1:5000/drop/" + class_name + "/" + firstname + "/" + lastname);
+            req.open("DELETE", "/drop/" + className + "/{{ firstname }}/{{ lastname }}");
             req.setRequestHeader("Content-Type", "application/json");
             req.send();
+            // After dropping, remove the corresponding row from the table
+            req.onload = function () {
+                if (req.status === 200) {
+                    const rows = document.getElementById('yourCoursesTable').getElementsByTagName('tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        if (cells[0].innerText === className && cells[1].innerText === '{{ firstname }} {{ lastname }}') {
+                            rows[i].remove();
+                            break;
+                        }
+                    }
+                }
+            };
         }
 
         function signOut() {
@@ -102,4 +131,5 @@
         }
     </script>
 </body>
+
 </html>
